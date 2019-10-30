@@ -61,6 +61,10 @@ while running:
 
         pc += 3
 
+    elif command == PRINT_REGISTER:
+        register_address = memory[pc + 1]
+        
+
     elif command == SAVE:
         variable = memory[pc + 1]
         register = memory[pc + 2]
