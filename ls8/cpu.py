@@ -83,6 +83,7 @@ class CPU:
                 running = False
 
             elif self.ram[ir] == self.LDI:
+
                 reg_add = self.ram[ir + 1]
                 value = self.ram[ir + 2]
                 self.reg[reg_add] = value
@@ -90,9 +91,11 @@ class CPU:
                 self.pc = + 3
 
             elif self.ram[ir] == self.PRN:
+
                 reg_add = self.ram[ir + 1]
                 value = self.reg[reg_add]
                 print(value)
+
                 self.pc += 2
 
             else:
