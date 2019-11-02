@@ -11,7 +11,9 @@ class CPU:
         self.ram = [00000000] * 32
         self.reg = [00000000] * 8
         self.pc = 0
-        self.HALT = 0b00000001
+        self.HLT = 0b00000001
+        self.LDI = 0b10000010
+        self.PRN = 0b01000111
 
     def ram_read(self, mar):
         mdr = self.ram[mar]
@@ -77,6 +79,21 @@ class CPU:
 
         while running == True:
             ir = self.pc
-            if self.ram[ir] == self.HALT:
+            if self.ram[ir] == self.HLT:
                 running = False
-            self.pc = self.pc + 1
+
+            elif self.ram[ir] == self.LDI:
+                reg_add = self.ram[ir + 1]
+                value = self.ram[ir + 2]
+                self.reg[reg_add] = value
+
+                self.pc = + 3
+
+            elif self.ram[ir] == self.PRN:
+                reg_add = self.ram[ir + 1]
+                value = self.reg[reg_add]
+                print(value)
+                self.pc += 2
+
+            else:
+                self.pc = self.pc + 1
