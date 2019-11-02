@@ -11,6 +11,7 @@ class CPU:
         self.ram = [00000000] * 32
         self.reg = [00000000] * 8
         self.pc = 0
+        self.HALT = 0b00000001
 
     def ram_read(self, mar):
         mdr = self.ram[mar]
@@ -72,4 +73,10 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+        running = True
+
+        while running == True:
+            ir = self.pc
+            if self.ram[ir] == self.HALT:
+                running = False
+            self.pc = self.pc + 1
