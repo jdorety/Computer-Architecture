@@ -23,24 +23,19 @@ class CPU:
         value = mdr
         self.ram[mar] = value
 
-    def load(self):
+    def load(self, path):
         """Load a program into memory."""
+        prog_list = []
+        load_file = open(path, 'r')
+        for line in load_file:
+            if line[0] not in ("#", "", "\n"):
+                prog_list.append(line)
+        load_file.close()
 
         address = 0
-
         # For now, we've just hardcoded a program:
-
-        program = [
-            # From print8.ls8
-            0b10000010,  # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111,  # PRN R0
-            0b00000000,
-            0b00000001,  # HLT
-        ]
-
-        for instruction in program:
+        print(prog_list)
+        for instruction in prog_list:
             self.ram[address] = instruction
             address += 1
 
