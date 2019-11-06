@@ -11,9 +11,11 @@ class CPU:
         self.ram = [00000000] * 32
         self.reg = [00000000] * 8
         self.pc = 0
-        self.HLT = 0b00000001
-        self.LDI = 0b10000010
-        self.PRN = 0b01000111
+        self.HLT = 0b0001
+        self.LDI = 0b0010
+        self.PRN = 0b0111
+        self.MUL = 0b0010
+        self.ADD = 0b0000
 
     def ram_read(self, mar):
         mdr = self.ram[mar]
@@ -49,7 +51,9 @@ class CPU:
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
+        elif op == "MUL":
         # elif op == "SUB": etc
+            self.reg[reg_a] *= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -78,28 +82,35 @@ class CPU:
         running = True
 
         while running == True:
-            ir = self.pc
-            command = self.ram[ir]
-            operands = (command >> 6) + 1
+            ir = self.ram[self.pc]
+            operands = (ir >> 6)
+            function = ir & 0b00001111
+            alu = (ir >> 5) & 0b001
 
-            if command == self.HLT:
+            if alu == 1: 
+                if function == self.MUL:
+                    self.alu("MUL", self.ram[self.pc + 1], self.ram[self.pc + 2])
+                elif function == 0b0000:
+                    self.alu("ADD", self.ram[self.pc + 1], self.ram[self.pc + 2])
+
+            elif function == self.HLT:
                 running = False
 
-            elif command == self.LDI:
-
-                reg_add = self.ram[ir + 1]
-                value = self.ram[ir + 2]
-                self.reg[reg_add] = value
+            elif function == self.LDI:
+                reg_address = self.ram[self.pc + 1]
+                value = self.ram[self.pc + 2]
+                self.reg[reg_address] = value
 
                 # self.pc = + 3
 
-            elif command == self.PRN:
+            elif function == self.PRN:
 
-                reg_add = self.ram[ir + 1]
+                reg_add = self.ram[self.pc + 1]
                 value = self.reg[reg_add]
                 print(value)
 
                 # self.pc += 2
-            self.pc += operands
+
+            self.pc += (operands + 1)
             # else:
             # self.pc = self.pc + 1
