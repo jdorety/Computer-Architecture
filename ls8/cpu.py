@@ -25,19 +25,24 @@ class CPU:
 
     def load(self, path):
         """Load a program into memory."""
-        prog_list = []
-        load_file = open(path, 'r')
-        for line in load_file:
-            if line[0] not in ("#", "", "\n"):
-                prog_list.append(line)
-        load_file.close()
-
-        address = 0
+        try:
+            load_file = open(path, 'r')
+            address = 0
+            for line in load_file:
+                split_line = line.split("#")
+                possible_command = split_line[0]
+                if len(possible_command) > 0:
+                    possible_command = possible_command.strip()
+                    if possible_command == "":
+                        pass
+                    else:
+                        command = int(possible_command, 2)
+                        self.ram[address] = command
+                        address += 1
+            load_file.close()
+        except(FileNotFoundError):
+            print("file not found")
         # For now, we've just hardcoded a program:
-        print(prog_list)
-        for instruction in prog_list:
-            self.ram[address] = instruction
-            address += 1
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -74,24 +79,27 @@ class CPU:
 
         while running == True:
             ir = self.pc
-            if self.ram[ir] == self.HLT:
+            command = self.ram[ir]
+            operands = (command >> 6) + 1
+
+            if command == self.HLT:
                 running = False
 
-            elif self.ram[ir] == self.LDI:
+            elif command == self.LDI:
 
                 reg_add = self.ram[ir + 1]
                 value = self.ram[ir + 2]
                 self.reg[reg_add] = value
 
-                self.pc = + 3
+                # self.pc = + 3
 
-            elif self.ram[ir] == self.PRN:
+            elif command == self.PRN:
 
                 reg_add = self.ram[ir + 1]
                 value = self.reg[reg_add]
                 print(value)
 
-                self.pc += 2
-
-            else:
-                self.pc = self.pc + 1
+                # self.pc += 2
+            self.pc += operands
+            # else:
+            # self.pc = self.pc + 1
