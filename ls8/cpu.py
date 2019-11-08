@@ -10,12 +10,15 @@ class CPU:
         """Construct a new CPU."""
         self.ram = [00000000] * 32
         self.reg = [00000000] * 8
+        self.reg[7] = 0xF4
         self.pc = 0
+        self.stack = [] * 256
         self.HLT = 0b0001
         self.LDI = 0b0010
         self.PRN = 0b0111
         self.MUL = 0b0010
         self.ADD = 0b0000
+        self.PUSH = 0b0101
 
     def ram_read(self, mar):
         mdr = self.ram[mar]
@@ -83,6 +86,11 @@ class CPU:
     def handle_PRN(self, reg_address):
         print(self.reg[reg_address])
 
+    def handle_PUSH(self, reg_address):
+        self.reg[7] -= 1
+
+        self.stack[self.reg[7]] = self.reg[reg_address]
+
     def run(self):
         """Run the CPU."""
         running = True
@@ -97,6 +105,7 @@ class CPU:
                 if function == self.MUL:
                     self.alu("MUL", self.ram[self.pc + 1],
                              self.ram[self.pc + 2])
+
                 elif function == self.ADD:
                     self.alu("ADD", self.ram[self.pc + 1],
                              self.ram[self.pc + 2])
@@ -112,6 +121,9 @@ class CPU:
                 self.handle_PRN(self.ram[self.pc + 1])
 
                 # self.pc += 2
+
+            elif function == self.PUSH:
+                self.handle_PUSH(self.ram[self.pc + 1])
 
             self.pc += (operands + 1)
             # else:
