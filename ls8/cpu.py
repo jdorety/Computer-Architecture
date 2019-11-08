@@ -52,7 +52,7 @@ class CPU:
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
         elif op == "MUL":
-        # elif op == "SUB": etc
+            # elif op == "SUB": etc
             self.reg[reg_a] *= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
@@ -77,6 +77,12 @@ class CPU:
 
         print()
 
+    def handle_LDI(self, reg_address, value):
+        self.reg[reg_address] = value
+
+    def handle_PRN(self, reg_address):
+        print(self.reg[reg_address])
+
     def run(self):
         """Run the CPU."""
         running = True
@@ -87,27 +93,23 @@ class CPU:
             function = ir & 0b00001111
             alu = (ir >> 5) & 0b001
 
-            if alu == 1: 
+            if alu == 1:
                 if function == self.MUL:
-                    self.alu("MUL", self.ram[self.pc + 1], self.ram[self.pc + 2])
-                elif function == 0b0000:
-                    self.alu("ADD", self.ram[self.pc + 1], self.ram[self.pc + 2])
+                    self.alu("MUL", self.ram[self.pc + 1],
+                             self.ram[self.pc + 2])
+                elif function == self.ADD:
+                    self.alu("ADD", self.ram[self.pc + 1],
+                             self.ram[self.pc + 2])
 
             elif function == self.HLT:
                 running = False
 
             elif function == self.LDI:
-                reg_address = self.ram[self.pc + 1]
-                value = self.ram[self.pc + 2]
-                self.reg[reg_address] = value
-
+                self.handle_LDI(self.ram[self.pc + 1], self.ram[self.pc + 2])
                 # self.pc = + 3
 
             elif function == self.PRN:
-
-                reg_add = self.ram[self.pc + 1]
-                value = self.reg[reg_add]
-                print(value)
+                self.handle_PRN(self.ram[self.pc + 1])
 
                 # self.pc += 2
 
