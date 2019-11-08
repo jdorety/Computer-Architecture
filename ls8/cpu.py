@@ -107,6 +107,7 @@ class CPU:
             operands = (ir >> 6)
             function = ir & 0b00001111
             alu = (ir >> 5) & 0b001
+            set_pc = (ir >> 4) & 0b1
 
             if alu == 1:
                 if function == self.MUL:
@@ -132,4 +133,10 @@ class CPU:
             elif function == self.PUSH:
                 self.handle_PUSH(self.ram[self.pc + 1])
 
-            self.pc += (operands + 1)
+            else:
+                print("What are you trying to do to me?")
+
+            if set_pc == 1:
+                pass
+            else:
+                self.pc += (operands + 1)
