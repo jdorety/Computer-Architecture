@@ -122,12 +122,9 @@ class CPU:
 
             elif function == self.LDI:
                 self.handle_LDI(self.ram[self.pc + 1], self.ram[self.pc + 2])
-                # self.pc = + 3
 
             elif function == self.PRN:
                 self.handle_PRN(self.ram[self.pc + 1])
-
-                # self.pc += 2
 
             elif function == self.POP:
                 self.handle_POP(self.ram[self.pc + 1])
@@ -136,5 +133,3 @@ class CPU:
                 self.handle_PUSH(self.ram[self.pc + 1])
 
             self.pc += (operands + 1)
-            # else:
-            # self.pc = self.pc + 1
