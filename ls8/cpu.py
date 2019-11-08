@@ -19,6 +19,8 @@ class CPU:
         self.ADD = 0b0000
         self.POP = 0b0110
         self.PUSH = 0b0101
+        self.CALL = 0b0000
+        self.RET = 0b0001
 
     def ram_read(self, mar):
         mdr = self.ram[mar]
@@ -80,6 +82,10 @@ class CPU:
 
         print()
 
+    def handle_CALL(self, reg_address):
+        self.handle_PUSH(self.pc + 2)
+        self.pc = self.reg[reg_address]
+
     def handle_LDI(self, reg_address, value):
         self.reg[reg_address] = value
 
@@ -97,6 +103,10 @@ class CPU:
         sp = self.reg[7]
         self.stack[sp] = self.reg[reg_address]
 
+    def handle_RET(self):
+        self.handle_POP(0b1)
+        self.pc = self.reg[0b1]
+
     def run(self):
         """Run the CPU."""
         running = True
@@ -107,7 +117,13 @@ class CPU:
             operands = (ir >> 6)
             function = ir & 0b00001111
             alu = (ir >> 5) & 0b001
-            set_pc = (ir >> 4) & 0b1
+            set_pc = (ir >> 4) & 0b0001
+
+            if set_pc == 1:
+                if function == self.CALL:
+                    self.handle_CALL(self.pc + 1)
+                elif function == self.RET:
+                    self.handle_RET()
 
             if alu == 1:
                 if function == self.MUL:
