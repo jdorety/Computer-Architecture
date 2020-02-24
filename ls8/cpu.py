@@ -19,6 +19,8 @@ class CPU:
         self.ADD = 0b0000
         self.POP = 0b0110
         self.PUSH = 0b0101
+        self.CALL = 0b0000
+        self.RET = 0b0001
 
     def ram_read(self, mar):
         mdr = self.ram[mar]
@@ -80,6 +82,15 @@ class CPU:
 
         print()
 
+    def handle_CALL(self, reg_address):
+        return_add = self.pc + 2
+
+        self.reg[7] -= 1
+        sp = self.reg[7]
+        self.stack[sp] = return_add
+
+        self.pc = self.reg[reg_address]
+
     def handle_LDI(self, reg_address, value):
         self.reg[reg_address] = value
 
@@ -97,6 +108,14 @@ class CPU:
         sp = self.reg[7]
         self.stack[sp] = self.reg[reg_address]
 
+    def handle_RET(self):
+        sp = self.reg[7]
+        return_add = self.stack[sp]
+
+        self.reg[7] += 1
+
+        self.pc = return_add
+
     def run(self):
         """Run the CPU."""
         running = True
@@ -107,34 +126,40 @@ class CPU:
             operands = (ir >> 6)
             function = ir & 0b00001111
             alu = (ir >> 5) & 0b001
+            set_pc = (ir >> 4) & 0b0001
 
-            if alu == 1:
-                if function == self.MUL:
-                    self.alu("MUL", self.ram[self.pc + 1],
-                             self.ram[self.pc + 2])
+            if set_pc == 1:
+                if function == self.CALL:
+                    self.handle_CALL(self.ram[self.pc + 1])
+                elif function == self.RET:
+                    self.handle_RET()
 
-                elif function == self.ADD:
-                    self.alu("ADD", self.ram[self.pc + 1],
-                             self.ram[self.pc + 2])
+            else:
+                if alu == 1:
+                    if function == self.MUL:
+                        self.alu("MUL", self.ram[self.pc + 1],
+                                self.ram[self.pc + 2])
 
-            elif function == self.HLT:
-                running = False
+                    elif function == self.ADD:
+                        self.alu("ADD", self.ram[self.pc + 1],
+                                self.ram[self.pc + 2])
 
-            elif function == self.LDI:
-                self.handle_LDI(self.ram[self.pc + 1], self.ram[self.pc + 2])
-                # self.pc = + 3
+                elif function == self.HLT:
+                    running = False
 
-            elif function == self.PRN:
-                self.handle_PRN(self.ram[self.pc + 1])
+                elif function == self.LDI:
+                    self.handle_LDI(self.ram[self.pc + 1], self.ram[self.pc + 2])
 
-                # self.pc += 2
+                elif function == self.PRN:
+                    self.handle_PRN(self.ram[self.pc + 1])
 
-            elif function == self.POP:
-                self.handle_POP(self.ram[self.pc + 1])
+                elif function == self.POP:
+                    self.handle_POP(self.ram[self.pc + 1])
 
-            elif function == self.PUSH:
-                self.handle_PUSH(self.ram[self.pc + 1])
+                elif function == self.PUSH:
+                    self.handle_PUSH(self.ram[self.pc + 1])
 
-            self.pc += (operands + 1)
-            # else:
-            # self.pc = self.pc + 1
+                else:
+                    print("ERROR")
+
+                self.pc += (operands + 1)
