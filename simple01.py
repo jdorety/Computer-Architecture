@@ -1,4 +1,4 @@
-
+import sys
 
 PRINT_TIM = 0b01
 HALT = 0b10
@@ -7,24 +7,23 @@ SAVE = 0b100
 ADD = 0b101
 PRINT_REGISTER = 0b110
 
-memory = [
-    PRINT_TIM,
-    PRINT_NUM,
-    0b01,
-    PRINT_NUM,
-    0b111,
-    PRINT_NUM,
-    0b1111,
-    PRINT_TIM,
-    SAVE,
-    0b1,
-    0b01,
-    ADD,
-    0b11,
-    0b10,
-    PRINT_TIM,
-    HALT
-]
+memory = []
+
+if len(sys.argv) < 2:
+    print("hey tell me what file to read in")
+try:
+    with open(sys.argv[0]) as file:
+        for line in file:
+            split_line = line.split("#")
+            maybe_command = split_line[0]
+            if len(maybe_command) > 0:
+                maybe_command.strip()
+                print(maybe_command)
+                if maybe_command[0] == "1" or maybe_command[0] == "0":
+                    print(maybe_command)
+except FileNotFoundError:
+    print("hey, that file doesn not exist")
+
 
 registers = [0] * 8
 
@@ -63,7 +62,6 @@ while running:
 
     elif command == PRINT_REGISTER:
         register_address = memory[pc + 1]
-        
 
     elif command == SAVE:
         variable = memory[pc + 1]
